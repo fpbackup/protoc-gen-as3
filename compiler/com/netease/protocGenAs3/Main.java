@@ -8,9 +8,10 @@
 // as listed at <url: http://www.opensource.org/licenses/bsd-license.php >.
 
 package com.netease.protocGenAs3;
-import static google.protobuf.compiler.Plugin.*;
 import static com.google.protobuf.DescriptorProtos.*;
-import com.google.protobuf.*;
+import com.google.protobuf.ExtensionRegistry;
+import com.google.protobuf.compiler.PluginProtos;
+
 import java.io.*;
 import java.util.*;
 import java.math.*;
@@ -151,7 +152,7 @@ public final class Main {
 			addMessageToScope(messageScope, nested, export);
 		}
 	}
-	private static Scope<Object> buildScopeTree(CodeGeneratorRequest request) {
+	private static Scope<Object> buildScopeTree(PluginProtos.CodeGeneratorRequest request) {
 		Scope<Object> root = Scope.newRoot();
 		List<String> filesToGenerate = request.getFileToGenerateList();
 		for (FileDescriptorProto fdp : request.getProtoFileList()) {
@@ -1116,7 +1117,7 @@ public final class Main {
 	
 	@SuppressWarnings("unchecked")
 	private static void writeFiles(Scope<?> root,
-			CodeGeneratorResponse.Builder responseBuilder,
+			PluginProtos.CodeGeneratorResponse.Builder responseBuilder,
 			StringBuilder initializerContent) {
 		for (Map.Entry<String, Scope<?>> entry : root.children.entrySet()) {
 			Scope<?> scope = entry.getValue();
@@ -1128,7 +1129,7 @@ public final class Main {
 						StringBuilder classContent = new StringBuilder();
 						writeServiceClass((Scope<ServiceDescriptorProto>)scope, classContent);
 						responseBuilder.addFile(
-							CodeGeneratorResponse.File.newBuilder().
+							PluginProtos.CodeGeneratorResponse.File.newBuilder().
 								setName(scope.fullName.replace('.', '/') + ".as").
 								setContent(classContent.toString()).
 							build()
@@ -1147,7 +1148,7 @@ public final class Main {
 						sb.append(".as");
 
 						responseBuilder.addFile(
-							CodeGeneratorResponse.File.newBuilder().
+							PluginProtos.CodeGeneratorResponse.File.newBuilder().
 								setName(sb.toString()).
 								setContent(interfaceContent.toString()).
 							build()
@@ -1159,7 +1160,7 @@ public final class Main {
                     StringBuilder content = new StringBuilder();
                     writeFile(scope, content, initializerContent);
                     responseBuilder.addFile(
-                        CodeGeneratorResponse.File.newBuilder().
+                        PluginProtos.CodeGeneratorResponse.File.newBuilder().
                             setName(scope.fullName.replace('.', '/') + ".as").
                             setContent(content.toString()).
                         build()
@@ -1170,13 +1171,13 @@ public final class Main {
 		}
 	}
 	private static void writeFiles(Scope<?> root,
-			CodeGeneratorResponse.Builder responseBuilder) {
+			PluginProtos.CodeGeneratorResponse.Builder responseBuilder) {
 		StringBuilder initializerContent = new StringBuilder();
 		initializerContent.append("{\n");
 		writeFiles(root, responseBuilder, initializerContent);
 		initializerContent.append("}\n");
 		responseBuilder.addFile(
-			CodeGeneratorResponse.File.newBuilder().
+			PluginProtos.CodeGeneratorResponse.File.newBuilder().
 				setName("initializer.as.inc").
 				setContent(initializerContent.toString()).
 			build()
@@ -1377,13 +1378,13 @@ public final class Main {
 	public static void main(String[] args) throws IOException {
 		ExtensionRegistry registry = ExtensionRegistry.newInstance();
 		Options.registerAllExtensions(registry);
-		CodeGeneratorRequest request = CodeGeneratorRequest.
+		PluginProtos.CodeGeneratorRequest request = PluginProtos.CodeGeneratorRequest.
 				parseFrom(System.in, registry);
-		CodeGeneratorResponse response;
+		PluginProtos.CodeGeneratorResponse response;
 		try {
 			Scope<Object> root = buildScopeTree(request);
-			CodeGeneratorResponse.Builder responseBuilder =
-					CodeGeneratorResponse.newBuilder();
+			PluginProtos.CodeGeneratorResponse.Builder responseBuilder =
+					PluginProtos.CodeGeneratorResponse.newBuilder();
 			writeFiles(root, responseBuilder);
 			response = responseBuilder.build();
 		} catch (Exception e) {
@@ -1392,7 +1393,7 @@ public final class Main {
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			pw.flush();
-			CodeGeneratorResponse.newBuilder().setError(sw.toString()).
+			PluginProtos.CodeGeneratorResponse.newBuilder().setError(sw.toString()).
 					build().writeTo(System.out);
 			System.out.flush();
 			return;
