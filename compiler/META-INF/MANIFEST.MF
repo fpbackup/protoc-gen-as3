@@ -1,5 +1,3 @@
 Manifest-Version: 1.0
-Class-Path: protobuf-java-2.4.1.jar
-Created-By: 1.7.0_25 (Oracle Corporation)
-Main-Class: com/netease/protocGenAs3/Main
+Main-Class: com.netease.protocGenAs3.Main
 
